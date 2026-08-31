@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Explainable IoT Framework for Soil Fertility Prediction</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+</head>
+<body>
+<div id="authView" class="auth-view">
+  <div class="auth-card">
+    <div class="brand-mark">🌱</div>
+    <div class="eyebrow">EXPLAINABLE IoT • REAL-TIME AGRICULTURE</div>
+    <h1>Soil Fertility Intelligence</h1>
+    <p class="muted">Explainable IoT Framework for Soil Fertility Prediction</p>
+    <div class="tabs"><button class="tab active" data-auth="login">Login</button><button class="tab" data-auth="signup">Create account</button></div>
+    <form id="loginForm" class="auth-form">
+      <label>Email<input id="loginEmail" type="email" required></label>
+      <label>Password<input id="loginPassword" type="password" required></label>
+      <button class="primary" type="submit">Enter dashboard</button>
+    </form>
+    <form id="signupForm" class="auth-form hidden">
+      <label>Name<input id="signupName" required></label>
+      <label>Email<input id="signupEmail" type="email" required></label>
+      <label>Password<input id="signupPassword" type="password" minlength="6" required></label>
+      <button class="primary" type="submit">Create account</button>
+    </form>
+    <div id="authMsg" class="message"></div>
+  </div>
+</div>
+
+<div id="appView" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand"><span>🌱</span><div><strong>SoilAI</strong><small>Explainable IoT</small></div></div>
+    <nav>
+      <button class="nav active" data-section="overview">Overview</button>
+      <button class="nav" data-section="analytics">Analytics</button>
+      <button class="nav" data-section="explain">Explainability</button>
+      <button class="nav" data-section="crops">Crop recommendations</button>
+      <button class="nav" data-section="history">History</button>
+    </nav>
+    <div class="side-status"><span id="sideDot" class="dot"></span><span id="sideStatus">Waiting for Arduino</span></div>
+    <button id="themeBtn" class="ghost">☾ Dark / Light</button>
+    <button id="logoutBtn" class="ghost danger">Log out</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="eyebrow">LIVE SOIL INTELLIGENCE</div><h2>Explainable IoT Framework for Soil Fertility Prediction</h2></div>
+      <div class="user-chip"><span id="userName">User</span></div>
+    </header>
+
+    <section id="overview" class="section active">
+      <div class="hero">
+        <div><span class="live-pill">● REAL DATA ONLY</span><h1>Know your soil before you plant.</h1><p>Arduino measurements are combined with your selected field location and the soil raster layers to produce a traceable fertility prediction.</p></div>
+        <div class="location-box"><span>Field location</span><strong id="locationText">Not set</strong><button id="locateBtn" class="secondary">Use my current location</button></div>
+      </div>
+
+      <div class="notice" id="dataNotice">Waiting for a real Arduino reading. No simulated values are displayed.</div>
+
+      <div class="metrics">
+        <article class="metric"><span>pH</span><strong id="phValue">—</strong><small>Arduino</small></article>
+        <article class="metric"><span>Moisture</span><strong id="moistureValue">—</strong><small>Arduino</small></article>
+        <article class="metric"><span>Nitrogen</span><strong id="nitrogenValue">—</strong><small>Raster at field location</small></article>
+        <article class="metric"><span>CEC</span><strong id="cecValue">—</strong><small>Raster at field location</small></article>
+      </div>
+
+      <div class="grid-2">
+        <article class="panel prediction-panel"><div class="panel-head"><div><span class="eyebrow">ENSEMBLE RESULT</span><h3 id="fertilityValue">Waiting</h3></div><span id="confidenceBadge" class="badge">—</span></div><div class="models"><div><small>LightGBM</small><b id="lgbResult">—</b><span id="lgbConf">—</span></div><div><small>CatBoost</small><b id="catResult">—</b><span id="catConf">—</span></div></div><div class="agreement" id="agreement">Waiting for prediction</div></article>
+        <article class="panel"><div class="panel-head"><div><span class="eyebrow">LIVE WEATHER</span><h3>Field conditions</h3></div><button id="weatherBtn" class="icon-btn">↻</button></div><div class="weather-grid"><div><small>Temperature</small><b id="weatherTemp">—</b></div><div><small>Humidity</small><b id="weatherHum">—</b></div><div><small>Rain</small><b id="weatherRain">—</b></div><div><small>Wind</small><b id="weatherWind">—</b></div></div><p class="muted tiny">Source: Open-Meteo current weather for the selected field.</p></article>
+      </div>
+
+      <article class="panel"><div class="panel-head"><div><span class="eyebrow">SYSTEM STATUS</span><h3>Real-time pipeline</h3></div><span id="lastUpdate" class="muted">No reading yet</span></div><div class="status-grid"><div><span class="dot" id="arduinoDot"></span><b>Arduino</b><small id="arduinoText">Disconnected</small></div><div><span class="dot online"></span><b>ML models</b><small>Loaded</small></div><div><span class="dot" id="shapDot"></span><b>SHAP</b><small id="shapText">Checking</small></div><div><span class="dot" id="limeDot"></span><b>LIME</b><small id="limeText">Checking</small></div></div></article>
+    </section>
+
+    <section id="analytics" class="section">
+      <div class="section-title"><div><span class="eyebrow">HISTORICAL DATA</span><h2>Analytics</h2></div></div>
+      <div class="metrics"><article class="metric"><span>Total predictions</span><strong id="totalPredictions">0</strong></article><article class="metric"><span>Avg confidence</span><strong id="avgConfidence">—</strong></article><article class="metric"><span>Model agreement</span><strong id="agreementRate">—</strong></article></div>
+      <div class="grid-2"><article class="panel chart-panel"><h3>Soil parameters over time</h3><canvas id="soilChart"></canvas></article><article class="panel chart-panel"><h3>Fertility distribution</h3><canvas id="fertilityChart"></canvas></article></div>
+    </section>
+
+    <section id="explain" class="section">
+      <div class="section-title"><div><span class="eyebrow">EXPLAINABLE AI</span><h2>Why did the model decide this?</h2></div></div>
+      <article class="panel"><p class="muted">SHAP shows how each feature moves the LightGBM prediction. LIME shows local rules around this specific observation. Values below are generated from the latest real reading.</p><div id="shapList" class="explain-list"></div></article>
+      <article class="panel"><h3>LIME local explanation</h3><div id="limeList" class="lime-list"></div></article>
+    </section>
+
+    <section id="crops" class="section">
+      <div class="section-title"><div><span class="eyebrow">DECISION SUPPORT</span><h2>Crop recommendations</h2></div><button id="cropBtn" class="secondary">Refresh recommendations</button></div>
+      <div id="cropCards" class="crop-grid"><div class="empty">Waiting for real soil data.</div></div>
+      <p class="muted tiny">Recommendations are agronomic screening guidance based on the current measured soil conditions; validate with local agricultural advice before planting.</p>
+    </section>
+
+    <section id="history" class="section">
+      <div class="section-title"><div><span class="eyebrow">TRACEABILITY</span><h2>Prediction history</h2></div></div>
+      <article class="panel table-wrap"><table><thead><tr><th>Time</th><th>pH</th><th>Moisture</th><th>N</th><th>CEC</th><th>Fertility</th><th>Confidence</th></tr></thead><tbody id="historyBody"></tbody></table></article>
+    </section>
+  </main>
+</div>
+<script src="/js/main.js"></script>
+</body>
+</html>
