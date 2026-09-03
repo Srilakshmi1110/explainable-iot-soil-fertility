@@ -2,3 +2,31 @@
 html.light body{background:#f3f7f4;color:#122018}html.light .sidebar{background:#fff;border-color:#d9e6de}html.light .main{background:#f3f7f4}html.light .panel,html.light .metric{background:#fff;border-color:#d8e5dd}html.light .hero{background:linear-gradient(135deg,#fff,#eef8f1);border-color:#cce0d3}html.light .location-box,html.light .notice,html.light .models>div,html.light .status-grid div{background:#f7fbf8;border-color:#d8e5dd}html.light .nav{color:#5f7669}html.light .nav.active{background:#e4f5ea;color:#18733f}html.light .auth-card{background:#fff;border-color:#d8e5dd}html.light .auth-form input{background:#f7fbf8;color:#122018;border-color:#cdded4}html.light .ghost{color:#466052;border-color:#cdded4}
 @media(max-width:1000px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.sidebar nav{grid-template-columns:repeat(5,1fr)}.main{padding:20px}.metrics{grid-template-columns:1fr 1fr}.grid-2,.hero{grid-template-columns:1fr}.crop-grid{grid-template-columns:1fr}.status-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.sidebar nav{grid-template-columns:1fr 1fr}.metrics,.models{grid-template-columns:1fr}.main{padding:14px}.hero h1{font-size:30px}.topbar{display:block}.auth-card{padding:28px}}
+/* ALL BUTTONS */
+button,
+.btn {
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+/* Hover */
+button:hover,
+.btn:hover {
+    background: #B8F5C8;
+    color: #07140E;
+}
+
+/* While clicking */
+button:active,
+.btn:active {
+    background: #90EEA8;
+    color: #07140E;
+    transform: scale(0.97);
+}
+
+/* Keyboard focus */
+button:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid #B8F5C8;
+    outline-offset: 3px;
+}
