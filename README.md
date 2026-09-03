@@ -470,3 +470,28 @@ Python | Flask | Arduino | LightGBM | CatBoost | SHAP | LIME | Rasterio
 
 This project is developed for educational and research purposes.
 
+You used a geospatial soil-property dataset, extracted from GeoTIFF soil raster data.
+
+The dataset you created for the ML model has 12,748 observations and these 6 features:
+
+Latitude
+Longitude
+pH
+Moisture
+Nitrogen (N)
+CEC (Cation Exchange Capacity)
+
+Your soil_data.csv / soil_training.csv contains these values.
+
+For the actual system:
+
+pH + moisture → eventually come from your Arduino sensors
+Nitrogen + CEC → come from your existing geospatial raster data at the selected location
+Latitude + longitude → identify the field location
+
+So if someone asks “What dataset did you use?”, a good answer is:
+
+“I used a geospatial soil-property dataset derived from GeoTIFF raster data, containing 12,748 spatial observations with latitude, longitude, pH, moisture, nitrogen, and CEC attributes. These features were used to train the LightGBM and CatBoost soil-fertility classification models.”
+
+The dataset is not an Arduino dataset—the Arduino is being integrated for real-time pH and moisture measurements after training.
+
