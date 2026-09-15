@@ -39,6 +39,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 import config
+import advice_engine
 
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
 app.secret_key = getattr(config, "SECRET_KEY", "change-this-local-secret")
@@ -511,14 +512,91 @@ def weather():
     params = urlencode({
         "latitude": loc["latitude"], "longitude": loc["longitude"],
         "current": "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m",
+        "hourly": "precipitation",
+        "forecast_days": 3,
         "timezone": "auto"
     })
     try:
         with urlopen("https://api.open-meteo.com/v1/forecast?" + params, timeout=8) as r:
             data = json.loads(r.read().decode())
-        return jsonify({"success": True, "location": loc, "current": data.get("current", {})})
+        hourly_precip = (data.get("hourly", {}) or {}).get("precipitation", []) or []
+        forecast = {
+            "precipitation_next_24h_mm": float(sum(hourly_precip[:24])) if hourly_precip else None,
+            "precipitation_next_48h_mm": float(sum(hourly_precip[:48])) if hourly_precip else None,
+        }
+        return jsonify({"success": True, "location": loc, "current": data.get("current", {}), "forecast": forecast})
     except Exception as e:
         return jsonify({"success": False, "error": f"Weather service unavailable: {e}"}), 503
+
+@app.route("/api/advice")
+def advice():
+    """
+    Farmer-facing plain-language layer on top of what /api/latest and
+    /api/weather already compute: a plain-language explanation of the
+    current prediction, a plain-language model-agreement note, and
+    go/wait timing advice for fertilizing and irrigating based on the
+    live rain forecast.
+    """
+    lang = advice_engine.normalize_lang(request.args.get("lang"))
+
+    with state_lock:
+        reading = current.get("reading")
+        prediction = current.get("prediction")
+        explanation = current.get("explanation")
+
+    # The soil explanation needs an Arduino reading, but the rain-timing advice
+    # does not — it only needs the field location and the weather forecast. So
+    # don't bail out here: return whatever is available and let the UI show the
+    # rain advice even while we're still waiting on the sensor.
+    has_soil = bool(reading and prediction)
+
+    explanation_text = None
+    agreement_text = None
+    if has_soil:
+        explanation_text = advice_engine.explain_prediction(
+            prediction["fertility"], (explanation or {}).get("shap", []), lang=lang
+        )
+        agreement_text = advice_engine.agreement_message(
+            prediction["model_agreement"], prediction["lgb_prediction"],
+            prediction["cat_prediction"], lang=lang
+        )
+
+    forecast_24h = forecast_48h = None
+    loc = get_location()
+    if loc:
+        try:
+            params = urlencode({
+                "latitude": loc["latitude"], "longitude": loc["longitude"],
+                "hourly": "precipitation", "forecast_days": 3, "timezone": "auto",
+            })
+            with urlopen("https://api.open-meteo.com/v1/forecast?" + params, timeout=8) as r:
+                wdata = json.loads(r.read().decode())
+            hourly_precip = (wdata.get("hourly", {}) or {}).get("precipitation", []) or []
+            if hourly_precip:
+                forecast_24h = float(sum(hourly_precip[:24]))
+                forecast_48h = float(sum(hourly_precip[:48]))
+        except Exception as e:
+            print("Weather forecast unavailable for advice:", e)
+
+    fertilize_advice = advice_engine.get_timing_advice("fertilize", forecast_24h, forecast_48h, lang=lang)
+    # Without a sensor reading we have no moisture value; the irrigation advice
+    # then falls back to rain-only reasoning instead of failing.
+    irrigate_advice = advice_engine.get_timing_advice(
+        "irrigate", forecast_24h, forecast_48h,
+        soil_moisture_pct=reading.get("moisture") if has_soil else None, lang=lang,
+    )
+
+    return jsonify({
+        "success": True,
+        "lang": lang,
+        "fertility_label": advice_engine.translate_fertility(prediction["fertility"], lang) if has_soil else None,
+        "has_soil_data": has_soil,
+        "location_set": bool(loc),
+        "explanation_text": explanation_text,
+        "agreement_text": agreement_text,
+        "fertilize_advice": fertilize_advice,
+        "irrigate_advice": irrigate_advice,
+    })
 
 @app.route("/api/crop-recommendations")
 def crop_recommendations():

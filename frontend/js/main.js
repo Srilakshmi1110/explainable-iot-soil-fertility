@@ -55,13 +55,15 @@ function bindUI() {
   $("locateBtn").onclick = setLocation;
   $("weatherBtn").onclick = loadWeather;
   $("cropBtn").onclick = loadCrops;
+  bindLang();
 }
 async function loadAll() {
-  await Promise.all([loadLocation(), loadStatus(), loadLatest(), loadAnalytics(), loadHistory(), loadWeather(), loadCrops()]);
+  await Promise.all([loadLocation(), loadStatus(), loadLatest(), loadAnalytics(), loadHistory(), loadWeather(), loadCrops(), loadAdvice()]);
   setInterval(loadLatest, 2000);
   setInterval(loadAnalytics, 7000);
   setInterval(loadHistory, 10000);
   setInterval(loadWeather, 60000);
+  setInterval(loadAdvice, 15000);
 }
 async function get(path) { const r=await fetch(API+path,{credentials:"include"}); return r.json(); }
 async function loadLocation() {
@@ -146,3 +148,102 @@ async function loadCrops() {
   $("cropCards").innerHTML=d.recommendations.map((x,i)=>`<article class="crop-card"><span>#${i+1}</span><h3>${x.crop}</h3><div class="score">${x.score}/5</div><p>${x.reason}</p></article>`).join("");
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+
+
+// ---------- Farmer view: language support (en / hi / kn) ----------
+let LANG = (localStorage.farmerLang && ["en","hi","kn"].includes(localStorage.farmerLang)) ? localStorage.farmerLang : "en";
+
+const UI = {
+  en: {glance:"AT A GLANCE", farmerView:"Farmer view", soilStatus:"LIVE SOIL STATUS", timing:"TIMING",
+       fertilizer:"Fertilizer", irrigation:"Irrigation", soil:"SOIL", fertilitySuffix:"fertility",
+       waitingSoil:"Waiting for a soil reading", noReading:"No reading yet", noSensor:"No sensor reading yet",
+       connectHint:"Connect the Arduino to see your soil fertility. Rain timing below works without it.",
+       waitingData:"Waiting for real soil data.",
+       go:"GO", wait:"WAIT", hold_off:"NOT NEEDED", unknown:"NO DATA"},
+  hi: {glance:"एक नज़र में", farmerView:"किसान दृश्य", soilStatus:"मिट्टी की स्थिति", timing:"समय",
+       fertilizer:"खाद", irrigation:"सिंचाई", soil:"मिट्टी", fertilitySuffix:"उर्वरता",
+       waitingSoil:"मिट्टी की रीडिंग का इंतज़ार", noReading:"अभी कोई रीडिंग नहीं", noSensor:"अभी कोई सेंसर रीडिंग नहीं",
+       connectHint:"मिट्टी की उर्वरता देखने के लिए Arduino जोड़ें। नीचे दी गई बारिश की सलाह इसके बिना भी काम करती है।",
+       waitingData:"मिट्टी के वास्तविक आंकड़ों का इंतज़ार।",
+       go:"करें", wait:"रुकें", hold_off:"ज़रूरत नहीं", unknown:"जानकारी नहीं"},
+  kn: {glance:"ಒಂದು ನೋಟದಲ್ಲಿ", farmerView:"ರೈತ ನೋಟ", soilStatus:"ಮಣ್ಣಿನ ಸ್ಥಿತಿ", timing:"ಸಮಯ",
+       fertilizer:"ಗೊಬ್ಬರ", irrigation:"ನೀರಾವರಿ", soil:"ಮಣ್ಣು", fertilitySuffix:"ಫಲವತ್ತತೆ",
+       waitingSoil:"ಮಣ್ಣಿನ ಮಾಪನಕ್ಕಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ", noReading:"ಇನ್ನೂ ಮಾಪನ ಇಲ್ಲ", noSensor:"ಇನ್ನೂ ಸಂವೇದಕ ಮಾಪನ ಇಲ್ಲ",
+       connectHint:"ಮಣ್ಣಿನ ಫಲವತ್ತತೆ ನೋಡಲು Arduino ಸಂಪರ್ಕಿಸಿ. ಕೆಳಗಿನ ಮಳೆ ಸಲಹೆ ಅದಿಲ್ಲದೆಯೂ ಕೆಲಸ ಮಾಡುತ್ತದೆ.",
+       waitingData:"ನಿಜವಾದ ಮಣ್ಣಿನ ಮಾಹಿತಿಗಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ.",
+       go:"ಮಾಡಿ", wait:"ಕಾಯಿರಿ", hold_off:"ಅಗತ್ಯವಿಲ್ಲ", unknown:"ಮಾಹಿತಿ ಇಲ್ಲ"},
+};
+const t = k => (UI[LANG] && UI[LANG][k]) || UI.en[k];
+
+function applyLang() {
+  // Lets CSS relax letter-spacing / bump size for Indic scripts, which carry
+  // vowel marks above and below and turn illegible at small tracked-out sizes.
+  document.documentElement.setAttribute("data-lang", LANG);
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === LANG));
+}
+function bindLang() {
+  document.querySelectorAll(".lang-btn").forEach(b => b.onclick = () => {
+    LANG = b.dataset.lang;
+    try { localStorage.farmerLang = LANG; } catch (e) {}
+    applyLang();
+    loadAdvice();   // refetch so the generated sentences come back translated
+  });
+  applyLang();
+}
+
+async function loadAdvice() {
+  const d = await get("/advice?lang=" + LANG);
+  const alertBox = $("farmerAlert");
+  if (!d.success) {
+    $("farmerFertility").textContent = t("waitingSoil");
+    $("farmerExplanation").textContent = d.error || t("waitingData");
+    alertBox.classList.add("hidden");
+    return;
+  }
+
+  // Soil status needs the Arduino; rain timing does not. Handle them separately.
+  if (d.has_soil_data) {
+    const fertility = ($("fertilityValue").textContent || "\u2014").trim();
+    const cls = fertility.toLowerCase();
+    const known = ["high", "medium", "low"].includes(cls);
+    // Backend sends the fertility word already translated; fall back to English.
+    const shown = d.fertility_label || fertility;
+    $("farmerBadge").className = "farmer-ring" + (known ? " " + cls : "");
+    $("farmerBadge").textContent = known ? shown.charAt(0) : "\u2014";
+    $("farmerRingLabel").textContent = known ? shown : t("soil");
+    $("farmerFertility").textContent = known ? shown + " " + t("fertilitySuffix") : t("waitingSoil");
+    $("farmerExplanation").textContent = d.explanation_text || "";
+    $("farmerAgreement").textContent = d.agreement_text || "";
+    $("farmerAgreement").className = "farmer-agreement" + (/disagree/i.test(d.agreement_text || "") ? " warn" : "");
+    $("farmerUpdated").textContent = $("lastUpdate").textContent || t("noReading");
+  } else {
+    $("farmerBadge").className = "farmer-ring";
+    $("farmerBadge").textContent = "\u2014";
+    $("farmerRingLabel").textContent = t("soil");
+    $("farmerFertility").textContent = t("waitingSoil");
+    $("farmerExplanation").textContent = t("connectHint");
+    $("farmerAgreement").textContent = t("noSensor");
+    $("farmerAgreement").className = "farmer-agreement";
+    $("farmerUpdated").textContent = t("noReading");
+  }
+
+  applyAdvice("fertilize", d.fertilize_advice);
+  applyAdvice("irrigate", d.irrigate_advice);
+
+  if (d.fertilize_advice && d.fertilize_advice.recommendation === "wait") {
+    $("farmerAlertText").textContent = d.fertilize_advice.message;
+    alertBox.classList.remove("hidden");
+  } else {
+    alertBox.classList.add("hidden");
+  }
+}
+function applyAdvice(key, advice) {
+  const card = $(key + "Card"), pill = $(key + "Pill"), text = $(key + "Advice");
+  const rec = (advice && advice.recommendation) || "unknown";
+  const labels = {go: t("go"), wait: t("wait"), hold_off: t("hold_off"), unknown: t("unknown")};
+  card.className = "action-card" + (rec === "unknown" ? "" : " " + rec);
+  pill.className = "action-pill" + (rec === "unknown" ? "" : " " + rec);
+  pill.textContent = labels[rec] || "—";
+  text.textContent = advice ? advice.message : "—";
+}

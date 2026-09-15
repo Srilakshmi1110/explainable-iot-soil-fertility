@@ -35,6 +35,7 @@
     <div class="brand"><span>🌱</span><div><strong>SoilAI</strong><small>Explainable IoT</small></div></div>
     <nav>
       <button class="nav active" data-section="overview">Overview</button>
+      <button class="nav" data-section="farmer">Farmer view</button>
       <button class="nav" data-section="analytics">Analytics</button>
       <button class="nav" data-section="explain">Explainability</button>
       <button class="nav" data-section="crops">Crop recommendations</button>
@@ -72,6 +73,60 @@
       </div>
 
       <article class="panel"><div class="panel-head"><div><span class="eyebrow">SYSTEM STATUS</span><h3>Real-time pipeline</h3></div><span id="lastUpdate" class="muted">No reading yet</span></div><div class="status-grid"><div><span class="dot" id="arduinoDot"></span><b>Arduino</b><small id="arduinoText">Disconnected</small></div><div><span class="dot online"></span><b>ML models</b><small>Loaded</small></div><div><span class="dot" id="shapDot"></span><b>SHAP</b><small id="shapText">Checking</small></div><div><span class="dot" id="limeDot"></span><b>LIME</b><small id="limeText">Checking</small></div></div></article>
+    </section>
+
+    <section id="farmer" class="section">
+      <div class="section-title">
+        <div><span class="eyebrow" data-i18n="glance">AT A GLANCE</span><h2 data-i18n="farmerView">Farmer view</h2></div>
+        <div class="lang-switch">
+          <button class="lang-btn active" data-lang="en">English</button>
+          <button class="lang-btn" data-lang="hi">हिंदी</button>
+          <button class="lang-btn" data-lang="kn">ಕನ್ನಡ</button>
+        </div>
+      </div>
+      <div class="farmer-updated-row"><span id="farmerUpdated" class="muted tiny">No reading yet</span></div>
+
+      <div id="farmerAlert" class="farmer-alert hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 16a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.6-1.5A4.5 4.5 0 0 0 7.5 15"/><path d="M8 19v1"/><path d="M12 19v2"/><path d="M16 19v1"/></svg>
+        <span id="farmerAlertText"></span>
+      </div>
+
+      <article class="farmer-hero">
+        <div class="farmer-ring-wrap">
+          <div id="farmerBadge" class="farmer-ring">—</div>
+          <span id="farmerRingLabel" class="farmer-ring-label">SOIL</span>
+        </div>
+        <div class="farmer-hero-text">
+          <span class="live-pill">● <span data-i18n="soilStatus">LIVE SOIL STATUS</span></span>
+          <h1 id="farmerFertility">Waiting for a reading</h1>
+          <p id="farmerExplanation">Explanations will appear here once a real reading comes in.</p>
+          <div id="farmerAgreement" class="farmer-agreement">Waiting for prediction</div>
+        </div>
+      </article>
+
+      <div class="farmer-actions">
+        <article id="fertilizeCard" class="action-card">
+          <div class="action-head">
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12c-4 0-7-2-7-6 4 0 7 1 7 6Z"/><path d="M12 12c4 0 7-3 7-7-4 0-7 2-7 7Z"/></svg>
+            </span>
+            <div class="action-title"><span class="eyebrow" data-i18n="timing">TIMING</span><h3 data-i18n="fertilizer">Fertilizer</h3></div>
+            <span id="fertilizePill" class="action-pill">—</span>
+          </div>
+          <p id="fertilizeAdvice">Waiting for soil data and rain forecast.</p>
+        </article>
+
+        <article id="irrigateCard" class="action-card">
+          <div class="action-head">
+            <span class="action-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7s5.5 6 5.5 10.3a5.5 5.5 0 0 1-11 0C6.5 8.7 12 2.7 12 2.7Z"/></svg>
+            </span>
+            <div class="action-title"><span class="eyebrow" data-i18n="timing">TIMING</span><h3 data-i18n="irrigation">Irrigation</h3></div>
+            <span id="irrigatePill" class="action-pill">—</span>
+          </div>
+          <p id="irrigateAdvice">Waiting for soil data and rain forecast.</p>
+        </article>
+      </div>
     </section>
 
     <section id="analytics" class="section">
