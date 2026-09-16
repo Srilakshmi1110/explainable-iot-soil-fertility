@@ -1,158 +1,1691 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Explainable IoT Framework for Soil Fertility Prediction</title>
-<link rel="stylesheet" href="/css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SoilAI — Soil Fertility Prediction</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
-<div id="authView" class="auth-view">
-  <div class="auth-card">
-    <div class="brand-mark">🌱</div>
-    <div class="eyebrow">EXPLAINABLE IoT • REAL-TIME AGRICULTURE</div>
-    <h1>Soil Fertility Intelligence</h1>
-    <p class="muted">Explainable IoT Framework for Soil Fertility Prediction</p>
-    <div class="tabs"><button class="tab active" data-auth="login">Login</button><button class="tab" data-auth="signup">Create account</button></div>
-    <form id="loginForm" class="auth-form">
-      <label>Email<input id="loginEmail" type="email" required></label>
-      <label>Password<input id="loginPassword" type="password" required></label>
-      <button class="primary" type="submit">Enter dashboard</button>
-    </form>
-    <form id="signupForm" class="auth-form hidden">
-      <label>Name<input id="signupName" required></label>
-      <label>Email<input id="signupEmail" type="email" required></label>
-      <label>Password<input id="signupPassword" type="password" minlength="6" required></label>
-      <button class="primary" type="submit">Create account</button>
-    </form>
-    <div id="authMsg" class="message"></div>
-  </div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+
+<!-- =========================================================
+     AUTHENTICATION
+========================================================= -->
+
+<div id="authScreen" class="auth-screen">
+
+    <div class="auth-card">
+
+        <div class="brand-mark">S</div>
+
+        <h1>SoilAI</h1>
+
+        <p class="auth-subtitle">
+            Explainable soil fertility prediction
+        </p>
+
+
+        <div class="auth-tabs">
+
+            <button
+                class="auth-tab active"
+                data-auth="login"
+                type="button"
+            >
+                Login
+            </button>
+
+            <button
+                class="auth-tab"
+                data-auth="signup"
+                type="button"
+            >
+                Sign up
+            </button>
+
+        </div>
+
+
+        <!-- LOGIN -->
+
+        <form id="loginForm" class="auth-form">
+
+            <label>
+                Username / Farmer ID / Email / Mobile
+
+                <input
+                    id="loginUsername"
+                    type="text"
+                    placeholder="Username, email or mobile"
+                    required
+                >
+            </label>
+
+
+            <label>
+                Password
+
+                <input
+                    id="loginPassword"
+                    type="password"
+                    placeholder="Password"
+                    required
+                >
+            </label>
+
+
+            <button
+                type="submit"
+                class="primary-btn full-btn"
+            >
+                Login
+            </button>
+
+        </form>
+
+
+        <!-- SIGNUP -->
+
+        <form
+            id="signupForm"
+            class="auth-form hidden"
+        >
+
+            <label>
+                Farmer name
+
+                <input
+                    id="signupName"
+                    type="text"
+                    placeholder="Enter your name"
+                    required
+                >
+            </label>
+
+
+            <label>
+                Username / Farmer ID
+
+                <input
+                    id="signupUsername"
+                    type="text"
+                    placeholder="Choose a username"
+                    required
+                >
+            </label>
+
+
+            <label>
+                Email / Mobile
+
+                <input
+                    id="signupContact"
+                    type="text"
+                    placeholder="Email or mobile number"
+                    required
+                >
+            </label>
+
+
+            <label>
+                Password
+
+                <input
+                    id="signupPassword"
+                    type="password"
+                    placeholder="Create a password"
+                    required
+                >
+            </label>
+
+
+            <button
+                type="submit"
+                class="primary-btn full-btn"
+            >
+                Create farmer account
+            </button>
+
+        </form>
+
+
+        <p class="auth-note">
+            Local project environment
+        </p>
+
+    </div>
+
 </div>
 
-<div id="appView" class="app hidden">
-  <aside class="sidebar">
-    <div class="brand"><span>🌱</span><div><strong>SoilAI</strong><small>Explainable IoT</small></div></div>
-    <nav>
-      <button class="nav active" data-section="overview">Overview</button>
-      <button class="nav" data-section="farmer">Farmer view</button>
-      <button class="nav" data-section="analytics">Analytics</button>
-      <button class="nav" data-section="explain">Explainability</button>
-      <button class="nav" data-section="crops">Crop recommendations</button>
-      <button class="nav" data-section="history">History</button>
-    </nav>
-    <div class="side-status"><span id="sideDot" class="dot"></span><span id="sideStatus">Waiting for Arduino</span></div>
-    <button id="themeBtn" class="ghost">☾ Dark / Light</button>
-    <button id="logoutBtn" class="ghost danger">Log out</button>
-  </aside>
 
-  <main class="main">
-    <header class="topbar">
-      <div><div class="eyebrow">LIVE SOIL INTELLIGENCE</div><h2>Explainable IoT Framework for Soil Fertility Prediction</h2></div>
-      <div class="user-chip"><span id="userName">User</span></div>
-    </header>
 
-    <section id="overview" class="section active">
-      <div class="hero">
-        <div><span class="live-pill">● REAL DATA ONLY</span><h1>Know your soil before you plant.</h1><p>Arduino measurements are combined with your selected field location and the soil raster layers to produce a traceable fertility prediction.</p></div>
-        <div class="location-box"><span>Field location</span><strong id="locationText">Not set</strong><button id="locateBtn" class="secondary">Use my current location</button></div>
-      </div>
+<!-- =========================================================
+     APPLICATION
+========================================================= -->
 
-      <div class="notice" id="dataNotice">Waiting for a real Arduino reading. No simulated values are displayed.</div>
+<div
+    id="appScreen"
+    class="app-shell hidden"
+>
 
-      <div class="metrics">
-        <article class="metric"><span>pH</span><strong id="phValue">—</strong><small>Arduino</small></article>
-        <article class="metric"><span>Moisture</span><strong id="moistureValue">—</strong><small>Arduino</small></article>
-        <article class="metric"><span>Nitrogen</span><strong id="nitrogenValue">—</strong><small>Raster at field location</small></article>
-        <article class="metric"><span>CEC</span><strong id="cecValue">—</strong><small>Raster at field location</small></article>
-      </div>
 
-      <div class="grid-2">
-        <article class="panel prediction-panel"><div class="panel-head"><div><span class="eyebrow">ENSEMBLE RESULT</span><h3 id="fertilityValue">Waiting</h3></div><span id="confidenceBadge" class="badge">—</span></div><div class="models"><div><small>LightGBM</small><b id="lgbResult">—</b><span id="lgbConf">—</span></div><div><small>CatBoost</small><b id="catResult">—</b><span id="catConf">—</span></div></div><div class="agreement" id="agreement">Waiting for prediction</div></article>
-        <article class="panel"><div class="panel-head"><div><span class="eyebrow">LIVE WEATHER</span><h3>Field conditions</h3></div><button id="weatherBtn" class="icon-btn">↻</button></div><div class="weather-grid"><div><small>Temperature</small><b id="weatherTemp">—</b></div><div><small>Humidity</small><b id="weatherHum">—</b></div><div><small>Rain</small><b id="weatherRain">—</b></div><div><small>Wind</small><b id="weatherWind">—</b></div></div><p class="muted tiny">Source: Open-Meteo current weather for the selected field.</p></article>
-      </div>
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
-      <article class="panel"><div class="panel-head"><div><span class="eyebrow">SYSTEM STATUS</span><h3>Real-time pipeline</h3></div><span id="lastUpdate" class="muted">No reading yet</span></div><div class="status-grid"><div><span class="dot" id="arduinoDot"></span><b>Arduino</b><small id="arduinoText">Disconnected</small></div><div><span class="dot online"></span><b>ML models</b><small>Loaded</small></div><div><span class="dot" id="shapDot"></span><b>SHAP</b><small id="shapText">Checking</small></div><div><span class="dot" id="limeDot"></span><b>LIME</b><small id="limeText">Checking</small></div></div></article>
-    </section>
+    <aside class="sidebar">
 
-    <section id="farmer" class="section">
-      <div class="section-title">
-        <div><span class="eyebrow" data-i18n="glance">AT A GLANCE</span><h2 data-i18n="farmerView">Farmer view</h2></div>
-        <div class="lang-switch">
-          <button class="lang-btn active" data-lang="en">English</button>
-          <button class="lang-btn" data-lang="hi">हिंदी</button>
-          <button class="lang-btn" data-lang="kn">ಕನ್ನಡ</button>
+        <div class="sidebar-top">
+
+            <div class="logo-row">
+
+                <div class="brand-mark small">
+                    S
+                </div>
+
+                <div>
+
+                    <div class="brand-name">
+                        SoilAI
+                    </div>
+
+                    <div class="brand-caption">
+                        Field intelligence
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <nav class="main-nav">
+
+                <button
+                    class="nav-item active"
+                    data-page="overview"
+                    type="button"
+                >
+                    <span class="nav-icon">⌂</span>
+                    <span>Overview</span>
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    data-page="analytics"
+                    type="button"
+                >
+                    <span class="nav-icon">▥</span>
+                    <span>Analytics</span>
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    data-page="explainability"
+                    type="button"
+                >
+                    <span class="nav-icon">◎</span>
+                    <span>Explainability</span>
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    data-page="crops"
+                    type="button"
+                >
+                    <span class="nav-icon">◫</span>
+                    <span>Crop recommendations</span>
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    data-page="history"
+                    type="button"
+                >
+                    <span class="nav-icon">↺</span>
+                    <span>History</span>
+                </button>
+
+            </nav>
+
         </div>
-      </div>
-      <div class="farmer-updated-row"><span id="farmerUpdated" class="muted tiny">No reading yet</span></div>
 
-      <div id="farmerAlert" class="farmer-alert hidden">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 16a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.6-1.5A4.5 4.5 0 0 0 7.5 15"/><path d="M8 19v1"/><path d="M12 19v2"/><path d="M16 19v1"/></svg>
-        <span id="farmerAlertText"></span>
-      </div>
 
-      <article class="farmer-hero">
-        <div class="farmer-ring-wrap">
-          <div id="farmerBadge" class="farmer-ring">—</div>
-          <span id="farmerRingLabel" class="farmer-ring-label">SOIL</span>
+        <div class="sidebar-bottom">
+
+            <div class="connection-card">
+
+                <div class="status-dot"></div>
+
+                <div>
+
+                    <strong id="connectionText">
+                        Checking connection
+                    </strong>
+
+                    <span id="connectionSubtext">
+                        Backend status
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                id="themeToggle"
+                class="side-action"
+                type="button"
+            >
+                <span>◐</span>
+                <span>Appearance</span>
+            </button>
+
+
+            <button
+                id="logoutBtn"
+                class="side-action logout"
+                type="button"
+            >
+                <span>↪</span>
+                <span>Log out</span>
+            </button>
+
         </div>
-        <div class="farmer-hero-text">
-          <span class="live-pill">● <span data-i18n="soilStatus">LIVE SOIL STATUS</span></span>
-          <h1 id="farmerFertility">Waiting for a reading</h1>
-          <p id="farmerExplanation">Explanations will appear here once a real reading comes in.</p>
-          <div id="farmerAgreement" class="farmer-agreement">Waiting for prediction</div>
-        </div>
-      </article>
 
-      <div class="farmer-actions">
-        <article id="fertilizeCard" class="action-card">
-          <div class="action-head">
-            <span class="action-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12c-4 0-7-2-7-6 4 0 7 1 7 6Z"/><path d="M12 12c4 0 7-3 7-7-4 0-7 2-7 7Z"/></svg>
-            </span>
-            <div class="action-title"><span class="eyebrow" data-i18n="timing">TIMING</span><h3 data-i18n="fertilizer">Fertilizer</h3></div>
-            <span id="fertilizePill" class="action-pill">—</span>
-          </div>
-          <p id="fertilizeAdvice">Waiting for soil data and rain forecast.</p>
-        </article>
+    </aside>
 
-        <article id="irrigateCard" class="action-card">
-          <div class="action-head">
-            <span class="action-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7s5.5 6 5.5 10.3a5.5 5.5 0 0 1-11 0C6.5 8.7 12 2.7 12 2.7Z"/></svg>
-            </span>
-            <div class="action-title"><span class="eyebrow" data-i18n="timing">TIMING</span><h3 data-i18n="irrigation">Irrigation</h3></div>
-            <span id="irrigatePill" class="action-pill">—</span>
-          </div>
-          <p id="irrigateAdvice">Waiting for soil data and rain forecast.</p>
-        </article>
-      </div>
-    </section>
 
-    <section id="analytics" class="section">
-      <div class="section-title"><div><span class="eyebrow">HISTORICAL DATA</span><h2>Analytics</h2></div></div>
-      <div class="metrics"><article class="metric"><span>Total predictions</span><strong id="totalPredictions">0</strong></article><article class="metric"><span>Avg confidence</span><strong id="avgConfidence">—</strong></article><article class="metric"><span>Model agreement</span><strong id="agreementRate">—</strong></article></div>
-      <div class="grid-2"><article class="panel chart-panel"><h3>Soil parameters over time</h3><canvas id="soilChart"></canvas></article><article class="panel chart-panel"><h3>Fertility distribution</h3><canvas id="fertilityChart"></canvas></article></div>
-    </section>
 
-    <section id="explain" class="section">
-      <div class="section-title"><div><span class="eyebrow">EXPLAINABLE AI</span><h2>Why did the model decide this?</h2></div></div>
-      <article class="panel"><p class="muted">SHAP shows how each feature moves the LightGBM prediction. LIME shows local rules around this specific observation. Values below are generated from the latest real reading.</p><div id="shapList" class="explain-list"></div></article>
-      <article class="panel"><h3>LIME local explanation</h3><div id="limeList" class="lime-list"></div></article>
-    </section>
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
 
-    <section id="crops" class="section">
-      <div class="section-title"><div><span class="eyebrow">DECISION SUPPORT</span><h2>Crop recommendations</h2></div><button id="cropBtn" class="secondary">Refresh recommendations</button></div>
-      <div id="cropCards" class="crop-grid"><div class="empty">Waiting for real soil data.</div></div>
-      <p class="muted tiny">Recommendations are agronomic screening guidance based on the current measured soil conditions; validate with local agricultural advice before planting.</p>
-    </section>
+    <main class="main-content">
 
-    <section id="history" class="section">
-      <div class="section-title"><div><span class="eyebrow">TRACEABILITY</span><h2>Prediction history</h2></div></div>
-      <article class="panel table-wrap"><table><thead><tr><th>Time</th><th>pH</th><th>Moisture</th><th>N</th><th>CEC</th><th>Fertility</th><th>Confidence</th></tr></thead><tbody id="historyBody"></tbody></table></article>
-    </section>
-  </main>
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <div class="eyebrow">
+                    SOIL MONITORING SYSTEM
+                </div>
+
+                <h1 id="pageTitle">
+                    Overview
+                </h1>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="location-pill">
+
+                    <span class="location-icon">
+                        ⌖
+                    </span>
+
+                    <span id="locationText">
+                        Location unavailable
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="user-avatar"
+                    id="userAvatar"
+                >
+                    U
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             OVERVIEW
+        ================================================== -->
+
+        <section
+            id="page-overview"
+            class="page active-page"
+        >
+
+
+            <!-- Prediction -->
+
+            <div class="hero-grid">
+
+                <div class="prediction-panel">
+
+                    <div class="panel-label">
+                        CURRENT FERTILITY STATUS
+                    </div>
+
+
+                    <div class="fertility-row">
+
+                        <div>
+
+                            <div
+                                id="fertilityValue"
+                                class="fertility-value"
+                            >
+                                Waiting
+                            </div>
+
+                            <div
+                                id="fertilityMessage"
+                                class="muted"
+                            >
+                                Waiting for valid soil measurements
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="fertilityBadge"
+                            class="fertility-badge neutral"
+                        >
+                            --
+                        </div>
+
+                    </div>
+
+
+                    <div class="prediction-meta">
+
+                        <div>
+
+                            <span>
+                                Confidence
+                            </span>
+
+                            <strong id="confidenceValue">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Model agreement
+                            </span>
+
+                            <strong id="agreementValue">
+                                --
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Last update
+                            </span>
+
+                            <strong id="lastUpdate">
+                                --
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Weather -->
+
+                <div class="weather-panel">
+
+                    <div class="panel-label">
+                        LOCAL WEATHER
+                    </div>
+
+
+                    <div class="weather-main">
+
+                        <div
+                            id="weatherTemp"
+                            class="weather-temp"
+                        >
+                            --°
+                        </div>
+
+
+                        <div>
+
+                            <strong id="weatherCondition">
+                                Waiting
+                            </strong>
+
+                            <span id="weatherDetails">
+                                Weather unavailable
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="weather-footer">
+
+                        <span>
+                            Humidity
+                        </span>
+
+                        <strong id="weatherHumidity">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 INPUT SECTION
+            ================================================== -->
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Soil input
+                    </h2>
+
+                    <p>
+                        Use live IoT measurements or enter values manually
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="input-panel">
+
+
+                <!-- Input mode -->
+
+                <div class="input-mode-row">
+
+                    <div>
+
+                        <div class="input-title">
+                            Input mode
+                        </div>
+
+                        <div class="input-subtitle">
+                            Choose how field measurements are provided
+                        </div>
+
+                    </div>
+
+
+                    <div class="mode-switch">
+
+                        <button
+                            type="button"
+                            id="manualModeBtn"
+                            class="mode-btn active"
+                        >
+                            Manual entry
+                        </button>
+
+                        <button
+                            type="button"
+                            id="iotModeBtn"
+                            class="mode-btn"
+                        >
+                            IoT sensor
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Manual input -->
+
+                <div
+                    id="manualInputPanel"
+                    class="manual-input-panel"
+                >
+
+                    <div class="manual-note">
+
+                        <span class="note-icon">
+                            i
+                        </span>
+
+                        <span>
+                            Enter the complete soil measurements for a reproducible manual test.
+                            Manual mode uses the Nitrogen and CEC values entered below.
+                            IoT/location mode can still use the location-based soil rasters.
+                        </span>
+
+                    </div>
+
+
+                    <div class="manual-grid">
+
+
+                        <div class="input-field">
+
+                            <label for="manualPh">
+                                Soil pH
+                            </label>
+
+                            <div class="input-with-unit">
+
+                                <input
+                                    id="manualPh"
+                                    type="number"
+                                    min="0"
+                                    max="14"
+                                    step="0.1"
+                                    placeholder="e.g. 6.5"
+                                >
+
+                                <span>
+                                    pH
+                                </span>
+
+                            </div>
+
+                            <small>
+                                Typical range: 0–14
+                            </small>
+
+                        </div>
+
+
+
+                        <div class="input-field">
+
+                            <label for="manualMoisture">
+                                Soil moisture
+                            </label>
+
+                            <div class="input-with-unit">
+
+                                <input
+                                    id="manualMoisture"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="0.1"
+                                    placeholder="e.g. 42"
+                                >
+
+                                <span>
+                                    %
+                                </span>
+
+                            </div>
+
+                            <small>
+                                Enter percentage value
+                            </small>
+
+                        </div>
+
+
+
+                        <div class="input-field">
+
+                            <label for="manualTemperature">
+                                Temperature
+                            </label>
+
+                            <div class="input-with-unit">
+
+                                <input
+                                    id="manualTemperature"
+                                    type="number"
+                                    min="-50"
+                                    max="70"
+                                    step="0.1"
+                                    placeholder="e.g. 27"
+                                >
+
+                                <span>
+                                    °C
+                                </span>
+
+                            </div>
+
+                            <small>
+                                Field temperature
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="manual-grid manual-soil-grid">
+
+                        <div class="input-field">
+                            <label for="manualNitrogen">Nitrogen</label>
+                            <div class="input-with-unit">
+                                <input
+                                    id="manualNitrogen"
+                                    type="number"
+                                    min="0"
+                                    max="2000"
+                                    step="0.1"
+                                    placeholder="e.g. 972"
+                                >
+                                <span>N</span>
+                            </div>
+                            <small>Available nitrogen</small>
+                        </div>
+
+                        <div class="input-field">
+                            <label for="manualCec">CEC</label>
+                            <div class="input-with-unit">
+                                <input
+                                    id="manualCec"
+                                    type="number"
+                                    min="0"
+                                    max="1000"
+                                    step="0.1"
+                                    placeholder="e.g. 459"
+                                >
+                                <span>CEC</span>
+                            </div>
+                            <small>Cation exchange capacity</small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="manual-grid manual-location-grid">
+
+                        <div class="input-field">
+
+                            <label for="manualLatitude">
+                                Latitude
+                            </label>
+
+                            <input
+                                id="manualLatitude"
+                                type="number"
+                                min="-90"
+                                max="90"
+                                step="0.000001"
+                                placeholder="e.g. 12.97"
+                            >
+
+                            <small>
+                                Field latitude (-90 to 90)
+                            </small>
+
+                        </div>
+
+
+                        <div class="input-field">
+
+                            <label for="manualLongitude">
+                                Longitude
+                            </label>
+
+                            <input
+                                id="manualLongitude"
+                                type="number"
+                                min="-180"
+                                max="180"
+                                step="0.000001"
+                                placeholder="e.g. 77.59"
+                            >
+
+                            <small>
+                                Field longitude (-180 to 180)
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="input-actions">
+
+                        <button
+                            id="useLocationBtn"
+                            type="button"
+                            class="secondary-btn"
+                        >
+                            Use my location
+                        </button>
+
+
+                        <button
+                            id="validateLocationBtn"
+                            type="button"
+                            class="secondary-btn"
+                        >
+                            Check soil data
+                        </button>
+
+
+                        <button
+                            id="findHighTestBtn"
+                            type="button"
+                            class="secondary-btn"
+                        >
+                            Find High test
+                        </button>
+
+
+                        <button
+                            id="predictManualBtn"
+                            type="button"
+                            class="primary-btn"
+                        >
+                            Predict fertility
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- IoT panel -->
+
+                <div
+                    id="iotInputPanel"
+                    class="iot-input-panel hidden"
+                >
+
+                    <div class="iot-status">
+
+                        <div class="iot-status-left">
+
+                            <div class="iot-status-dot"></div>
+
+                            <div>
+
+                                <strong id="iotStatusText">
+                                    Waiting for sensor
+                                </strong>
+
+                                <span id="iotStatusSubtext">
+                                    Connect the Arduino to begin receiving data
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="iot-badge">
+                            IoT
+                        </span>
+
+                    </div>
+
+
+                    <div class="iot-readings">
+
+                        <div class="iot-reading">
+
+                            <span>
+                                Moisture
+                            </span>
+
+                            <strong id="iotMoisture">
+                                --
+                            </strong>
+
+                            <small>
+                                %
+                            </small>
+
+                        </div>
+
+
+                        <div class="iot-reading">
+
+                            <span>
+                                Temperature
+                            </span>
+
+                            <strong id="iotTemperature">
+                                --
+                            </strong>
+
+                            <small>
+                                °C
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="input-actions">
+
+                        <button
+                            id="refreshSensorBtn"
+                            type="button"
+                            class="secondary-btn"
+                        >
+                            Refresh sensor
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 SOIL MEASUREMENTS
+            ================================================== -->
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Soil measurements
+                    </h2>
+
+                    <p>
+                        Current field and geospatial observations
+                    </p>
+
+                </div>
+
+
+                <div class="live-indicator">
+                    <span></span>
+                    LIVE
+                </div>
+
+            </div>
+
+
+            <div class="metric-grid">
+
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-label">
+                            pH
+                        </span>
+
+                        <span class="metric-symbol">
+                            pH
+                        </span>
+
+                    </div>
+
+                    <div
+                        id="phValue"
+                        class="metric-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="metric-description">
+                        Soil acidity / alkalinity
+                    </div>
+
+                </div>
+
+
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-label">
+                            Temperature
+                        </span>
+
+                        <span class="metric-symbol">
+                            °C
+                        </span>
+
+                    </div>
+
+                    <div
+                        id="temperatureValue"
+                        class="metric-value-large"
+                    >
+                        --
+                    </div>
+
+                    <div class="metric-description">
+                        Field temperature
+                    </div>
+
+                </div>
+
+
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-label">
+                            Moisture
+                        </span>
+
+                        <span class="metric-symbol">
+                            %
+                        </span>
+
+                    </div>
+
+                    <div
+                        id="moistureValue"
+                        class="metric-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="metric-description">
+                        Current soil moisture
+                    </div>
+
+                </div>
+
+
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-label">
+                            Nitrogen
+                        </span>
+
+                        <span class="metric-symbol">
+                            N
+                        </span>
+
+                    </div>
+
+                    <div
+                        id="nitrogenValue"
+                        class="metric-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="metric-description">
+                        Available nitrogen
+                    </div>
+
+                </div>
+
+
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-label">
+                            CEC
+                        </span>
+
+                        <span class="metric-symbol">
+                            CEC
+                        </span>
+
+                    </div>
+
+                    <div
+                        id="cecValue"
+                        class="metric-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="metric-description">
+                        Cation exchange capacity
+                    </div>
+
+                </div>
+
+
+
+                <div class="metric-card">
+
+                    <div class="metric-top">
+
+                        <span class="metric-label">
+                            Coordinates
+                        </span>
+
+                        <span class="metric-symbol">
+                            GPS
+                        </span>
+
+                    </div>
+
+                    <div
+                        id="coordinatesValue"
+                        class="coordinate-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="metric-description">
+                        Current field location
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MODEL COMPARISON
+            ================================================== -->
+
+            <div class="section-heading model-heading">
+
+                <div>
+
+                    <h2>
+                        Model comparison
+                    </h2>
+
+                    <p>
+                        Independent fertility predictions
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="model-grid">
+
+                <div class="model-card">
+
+                    <div class="model-card-header">
+
+                        <span>
+                            LightGBM
+                        </span>
+
+                        <span class="model-tag">
+                            Gradient boosting
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="lgbPrediction"
+                        class="model-prediction"
+                    >
+                        --
+                    </div>
+
+
+                    <div class="model-confidence">
+
+                        <span>
+                            Confidence
+                        </span>
+
+                        <strong id="lgbConfidence">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="model-card">
+
+                    <div class="model-card-header">
+
+                        <span>
+                            CatBoost
+                        </span>
+
+                        <span class="model-tag">
+                            Gradient boosting
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="catPrediction"
+                        class="model-prediction"
+                    >
+                        --
+                    </div>
+
+
+                    <div class="model-confidence">
+
+                        <span>
+                            Confidence
+                        </span>
+
+                        <strong id="catConfidence">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ANALYTICS
+        ================================================== -->
+
+        <section
+            id="page-analytics"
+            class="page"
+        >
+
+            <div class="page-intro">
+
+                <div>
+
+                    <div class="eyebrow">
+                        MODEL PERFORMANCE
+                    </div>
+
+                    <h2>
+                        Analytics
+                    </h2>
+
+                    <p>
+                        Prediction behaviour and recent soil observations.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="analytics-grid">
+
+                <div class="chart-card large">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Recent fertility predictions
+                            </h3>
+
+                            <p>
+                                Model output over recorded observations
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <canvas id="fertilityChart"></canvas>
+
+                </div>
+
+
+                <div class="chart-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Sensor trend
+                            </h3>
+
+                            <p>
+                                Moisture and temperature
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <canvas id="sensorChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <span>
+                        Total predictions
+                    </span>
+
+                    <strong id="totalPredictions">
+                        --
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        High fertility
+                    </span>
+
+                    <strong id="highCount">
+                        --
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        Medium fertility
+                    </span>
+
+                    <strong id="mediumCount">
+                        --
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <span>
+                        Low fertility
+                    </span>
+
+                    <strong id="lowCount">
+                        --
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             EXPLAINABILITY
+        ================================================== -->
+
+        <section
+            id="page-explainability"
+            class="page"
+        >
+
+            <div class="page-intro">
+
+                <div>
+
+                    <div class="eyebrow">
+                        MODEL TRANSPARENCY
+                    </div>
+
+                    <h2>
+                        Explainability
+                    </h2>
+
+                    <p>
+                        Understand which soil features influenced the prediction.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="explanation-grid">
+
+
+                <!-- SHAP -->
+
+                <div class="explanation-card">
+
+                    <div class="explanation-header">
+
+                        <div>
+
+                            <h3>
+                                SHAP
+                            </h3>
+
+                            <p>
+                                Feature contribution to the prediction
+                            </p>
+
+                        </div>
+
+                        <span class="method-tag">
+                            SHAP
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="shapList"
+                        class="explanation-list"
+                    >
+
+                        <div class="empty">
+                            SHAP is waiting for a valid explanation.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- LIME -->
+
+                <div class="explanation-card">
+
+                    <div class="explanation-header">
+
+                        <div>
+
+                            <h3>
+                                LIME
+                            </h3>
+
+                            <p>
+                                Local approximation of the prediction
+                            </p>
+
+                        </div>
+
+                        <span class="method-tag">
+                            LIME
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="limeList"
+                        class="explanation-list"
+                    >
+
+                        <div class="empty">
+                            LIME is waiting for a valid explanation.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="explanation-note">
+
+                <strong>
+                    How to read this
+                </strong>
+
+                <p>
+                    Larger feature contributions indicate stronger influence
+                    on the current model prediction. The explanation describes
+                    the model's decision and does not represent a causal claim.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CROP RECOMMENDATIONS
+        ================================================== -->
+
+        <section
+            id="page-crops"
+            class="page"
+        >
+
+            <div class="page-intro">
+
+                <div>
+
+                    <div class="eyebrow">
+                        AGRICULTURAL DECISION SUPPORT
+                    </div>
+
+                    <h2>
+                        Crop recommendations
+                    </h2>
+
+                    <p>
+                        Crops suggested from the current soil conditions.
+                    </p>
+
+                </div>
+
+            </div>
+
+<div
+    id="cropRecommendation"
+    class="crop-recommendation"
+>
+
+    <div class="empty">
+        A valid fertility prediction is required.
+    </div>
+
 </div>
+
+<div class="crop-explanation">
+
+    <h3>🔍 Why these recommendations?</h3>
+
+    <p>
+        The system uses the predicted soil fertility together with
+        pH, moisture, temperature, nitrogen and CEC to evaluate
+        crop suitability. Each recommendation includes a reason
+        explaining why the crop is suitable under the current
+        conditions.
+    </p>
+
+    <div class="crop-flow">
+
+        <span>Soil Data</span>
+        <span>→</span>
+        <span>Fertility Prediction</span>
+        <span>→</span>
+        <span>Crop Rules</span>
+        <span>→</span>
+        <span>Recommendation</span>
+
+    </div>
+
+</div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             HISTORY
+        ================================================== -->
+
+        <section
+            id="page-history"
+            class="page"
+        >
+
+            <div class="page-intro">
+
+                <div>
+
+                    <div class="eyebrow">
+                        FARMER RECORDS
+                    </div>
+
+                    <h2>
+                        Prediction history
+                    </h2>
+
+                    <p>
+                        Previous soil measurements and model predictions.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="refreshHistoryBtn"
+                    class="secondary-btn"
+                    type="button"
+                >
+                    Refresh
+                </button>
+
+            </div>
+
+
+            <div class="history-card">
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Time
+                                </th>
+
+                                <th>
+                                    Location
+                                </th>
+
+                                <th>
+                                    pH
+                                </th>
+
+                                <th>
+                                    Moisture
+                                </th>
+
+                                <th>
+                                    Temperature
+                                </th>
+
+                                <th>
+                                    Fertility
+                                </th>
+
+                                <th>
+                                    Confidence
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="historyBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="empty-cell"
+                                >
+                                    No prediction records yet.
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="/js/main.js"></script>
+
+
+
+
 </body>
 </html>
