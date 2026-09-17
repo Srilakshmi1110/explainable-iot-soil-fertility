@@ -1,252 +1,606 @@
-# SoilAI - Explainable IoT Framework for Soil Fertility Prediction
+# 🌱 Explainable IoT Soil Fertility Prediction System
 
-An intelligent, transparent soil monitoring system combining real-time Arduino IoT sensors with explainable machine learning to deliver accurate soil fertility predictions for smart farming.
+> **Sense the soil. Understand the prediction. Grow smarter.**
 
-**GitHub:** https://github.com/Srilakshmi1110/explainable-iot-soil-fertility
-
----
-
-## 🌱 **Overview**
-
-SoilAI integrates hardware sensors (pH, moisture, temperature), geospatial data, and interpretable ML models (LightGBM, CatBoost) to predict soil fertility with 97.5% accuracy. SHAP and LIME explanations ensure farmers understand *why* predictions are made, not just what they are.
+An **IoT + Machine Learning + Explainable AI** system that analyzes soil conditions, predicts soil fertility, explains the prediction, and provides crop recommendations.
 
 ---
 
-## ✨ **Key Features**
+## 🌾 Overview
 
-- **Real-Time Monitoring** — Arduino sensors capture pH, moisture, and temperature every 2 seconds
-- **Explainable Predictions** — SHAP feature importance and LIME rules show which soil factors drive fertility scores
-- **Multi-Crop Recommendations** — Rule-based engine suggests suitable crops based on soil conditions
-- **Prediction History** — Track 24+ hours of readings with geospatial coordinates (GPS)
-- **Model Comparison** — Independent predictions from LightGBM (100% confidence) and CatBoost (99.5% confidence)
-- **Secure Login** — Farmer authentication with session persistence
-- **Responsive Dashboard** — Real-time charts for moisture and temperature trends
-- **System Status** — Live indicators for model, database, and sensor connectivity
+The system combines **real-time IoT sensor readings**, **geospatial soil data**, **machine learning models**, and **Explainable AI** to perform soil fertility analysis.
+
+The system collects real-time **pH, moisture, and temperature** from Arduino sensors. Location-based **nitrogen and CEC** values are obtained from geospatial soil datasets. These values are combined into a **7-feature input vector** and passed to LightGBM and CatBoost models.
+
+The prediction is then explained using **SHAP and LIME**, followed by a **crop recommendation** based on soil conditions.
 
 ---
 
-## 🏗️ **Architecture**
+## ⚡ Key Features
 
-```
-Hardware (Arduino)
-    ↓
-Flask REST API (Python)
-    ↓
-SQLite Database
-    ├─ sensor_readings
-    ├─ predictions
-    ├─ shap_explanations
-    ├─ lime_explanations
-    └─ system_logs
-    ↓
-React Dashboard (Frontend)
-    ├─ Overview (real-time sensor values)
-    ├─ Analytics (trend charts)
-    ├─ Explainability (SHAP/LIME)
-    └─ Crop Recommendations
+**🌡️ Real-Time Soil Monitoring**
+Measures pH, moisture, and temperature using Arduino sensors.
+
+**📍 Location-Based Soil Analysis**
+Extracts nitrogen and CEC values from geospatial soil datasets based on the selected location.
+
+**🤖 Dual Machine Learning Prediction**
+Uses LightGBM and CatBoost to classify soil fertility as High, Medium, or Low.
+
+**🔍 Explainable AI**
+Uses SHAP and LIME to show the contribution of individual features to the prediction.
+
+**🌾 Crop Recommendation**
+Provides crop recommendations based on the available soil characteristics.
+
+**📊 Analytics Dashboard**
+Displays fertility distribution, prediction statistics, and sensor history.
+
+**🔐 User Authentication**
+Provides login-based access and stores user predictions.
+
+**💾 Prediction History**
+Stores previous predictions and soil readings using SQLite.
+
+---
+
+## 🧠 System Workflow
+
+```text
+        ┌──────────────────────────┐
+        │      Arduino Sensors     │
+        │  pH | Moisture | Temp.   │
+        └────────────┬─────────────┘
+                     │
+                     ▼
+        ┌──────────────────────────┐
+        │      Location Input      │
+        │   Latitude + Longitude   │
+        └────────────┬─────────────┘
+                     │
+                     ▼
+        ┌──────────────────────────┐
+        │    Geospatial Soil Data  │
+        │     Nitrogen + CEC       │
+        └────────────┬─────────────┘
+                     │
+                     ▼
+        ┌──────────────────────────┐
+        │     7-Feature Vector     │
+        │ Lat, Lon, pH, Moisture,  │
+        │ Temp, Nitrogen, CEC      │
+        └────────────┬─────────────┘
+                     │
+                     ▼
+        ┌──────────────────────────┐
+        │   LightGBM + CatBoost    │
+        │   Fertility Prediction   │
+        └────────────┬─────────────┘
+                     │
+             ┌───────┴────────┐
+             ▼                ▼
+       ┌───────────┐    ┌──────────────┐
+       │ SHAP +    │    │     Crop     │
+       │ LIME      │    │Recommendation│
+       └─────┬─────┘    └──────┬───────┘
+             │                  │
+             └────────┬─────────┘
+                      ▼
+             ┌─────────────────┐
+             │ Web Dashboard   │
+             └─────────────────┘
 ```
 
 ---
 
-## 🚀 **Quick Start**
+## 🔬 Machine Learning Models
 
-### Prerequisites
-- Python 3.10+
-- Arduino with sensors (pH module on A0, moisture on A1)
-- USB connection to laptop
+### LightGBM
 
-### Installation
+LightGBM is used as one of the primary gradient boosting classifiers for soil fertility prediction.
 
-```bash
-# Clone repository
-git clone https://github.com/Srilakshmi1110/explainable-iot-soil-fertility.git
-cd soil-fertility-iot
+### CatBoost
 
-# Create virtual environment
-python -m venv .venv
-.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # Mac/Linux
+CatBoost is used as the second classifier. Its prediction is compared with LightGBM to determine **model agreement and confidence**.
 
-# Install dependencies
-pip install -r requirements.txt
+The models classify soil into:
 
-# Initialize database
-python database_setup.py
-
-# Train models (optional; pre-trained models included)
-python backend/train_model.py
+```text
+High
+Medium
+Low
 ```
 
-### Run the System
+The final dashboard displays the predictions and confidence obtained from the trained models.
 
-```bash
-# Start Flask server
-python backend/app.py
+---
 
-# Open browser
-# http://localhost:5000
+## 🧩 Explainable AI
 
-# Login with:
-# Username: admin
-# Password: 123456
+The system does not only provide a fertility class. It also explains **which input features influenced the prediction**.
+
+### SHAP
+
+**SHAP (SHapley Additive exPlanations)** is used to determine the contribution of individual features to the model prediction.
+
+### LIME
+
+**LIME (Local Interpretable Model-Agnostic Explanations)** provides a local explanation for an individual prediction.
+
+Together, SHAP and LIME make the prediction more interpretable.
+
+---
+
+## 🌾 Crop Recommendation
+
+The system provides crop recommendations after soil fertility prediction.
+
+Currently supported crops include:
+
+```text
+Rice
+Wheat
+Maize
+Groundnut
+Millet
+```
+
+Recommendations are generated using available soil characteristics such as:
+
+```text
+pH
+Moisture
+Nitrogen
+CEC
 ```
 
 ---
 
-## 📊 **Dashboard Tabs**
+# 📡 IoT Sensor Layer
 
-| Tab | Purpose |
-|-----|---------|
-| **Overview** | Real-time pH, moisture, temperature + LightGBM/CatBoost predictions |
-| **Analytics** | 24h sensor trends, total predictions, model agreement rate |
-| **Explainability** | SHAP feature bars + LIME decision rules for each prediction |
-| **Crop Recommendations** | Rule-based engine ranks crops by soil suitability (3 rules: pH, moisture, temperature) |
+The Arduino provides real-time soil measurements.
+
+```text
+pH          → A1
+Moisture    → A0
+Temperature → A2
+```
+
+The 10K thermistor is used for temperature measurement.
+
+Example serial output:
+
+```text
+6.50,65.00,25.00
+```
+
+This represents:
+
+```text
+pH          = 6.50
+Moisture    = 65%
+Temperature = 25°C
+```
+
+The readings are sent to the Flask backend through the serial connection.
 
 ---
 
-## 🔌 **Arduino Setup**
+# 📂 Datasets Used
 
+## 1. Soil Dataset — `soil_data.csv`
+
+The primary soil dataset contains **12,748 samples** with the following attributes:
+
+```text
+Latitude
+Longitude
+pH
+Moisture
+Nitrogen
+CEC
 ```
-pH Sensor:        Moisture Sensor:
-RED → 5V          RED → 5V
-BLACK → GND       BLACK → GND
-YELLOW → A0       YELLOW → A1
 
-Baud Rate: 9600
-Output Format: "6.80,42.30" (pH, Moisture)
+The dataset is used for soil fertility model development.
+
+The fertility classes used by the system are:
+
+```text
+High
+Medium
+Low
 ```
 
-**For demo without Arduino:** Set `SIMULATE_ARDUINO = True` in `config.py`
+The fertility labels are derived from soil-property criteria used during model development.
+
+### Important Coordinate Note
+
+The latitude and longitude columns in the original dataset contain **projected spatial coordinates**, rather than standard decimal-degree latitude and longitude.
+
+The backend transforms these coordinates when geographic coordinates are required.
 
 ---
 
-## 📁 **Project Structure**
+## 2. Geospatial Soil Raster Datasets
 
+The project uses GeoTIFF raster datasets for location-based soil information:
+
+```text
+ph.tif
+nitrogen.tif
+cec.tif
 ```
-soil-fertility-iot/
+
+When a user selects a location, the backend converts the geographic coordinates into the raster coordinate system and extracts the corresponding soil-property value.
+
+If the selected pixel contains a **NoData value**, the system searches nearby pixels for a valid value.
+
+This allows the system to obtain:
+
+```text
+Location
+   ↓
+GeoTIFF
+   ↓
+Nitrogen + CEC + pH
+```
+
+---
+
+## 3. Temperature Dataset
+
+The temperature-enhanced model uses:
+
+```text
+soil_temperature.csv
+soil_training_temperature.csv
+```
+
+These datasets contain the training data used for the model that includes **temperature as an additional feature**.
+
+The final model uses seven features:
+
+```text
+Latitude
+Longitude
+pH
+Moisture
+Temperature
+Nitrogen
+CEC
+```
+
+---
+
+## 4. Real-Time IoT Data
+
+Real-time sensor readings are **not a static dataset**.
+
+They are generated directly from the Arduino:
+
+```text
+pH          → pH Sensor
+Moisture    → Soil Moisture Sensor
+Temperature → 10K Thermistor
+```
+
+These real-time measurements are combined with location-based soil information before sending the data to the prediction models.
+
+---
+
+# 🔌 APIs Used
+
+## Flask REST API
+
+The Flask backend provides REST API endpoints that connect the frontend dashboard with the prediction system.
+
+| Endpoint         | Purpose                                  |
+| ---------------- | ---------------------------------------- |
+| `/api/login`     | User authentication                      |
+| `/api/location`  | Store and retrieve selected location     |
+| `/api/latest`    | Retrieve latest IoT sensor readings      |
+| `/api/predict`   | Perform soil fertility prediction        |
+| `/api/analytics` | Retrieve prediction and sensor analytics |
+| `/api/advice`    | Generate crop recommendations            |
+
+The frontend communicates with these endpoints using JavaScript `fetch()` requests.
+
+---
+
+## 🌤️ Open-Meteo Weather API
+
+The system also uses the **Open-Meteo Weather API** to obtain weather information for the selected location.
+
+Weather information provides additional environmental context through parameters such as:
+
+```text
+Temperature
+Humidity
+Rainfall
+Weather Conditions
+```
+
+Weather data is displayed separately from the soil fertility prediction pipeline.
+
+---
+
+# 🖥️ Technology Stack
+
+### Hardware
+
+```text
+Arduino
+Soil pH Sensor
+Soil Moisture Sensor
+10K Thermistor
+```
+
+### Backend
+
+```text
+Python
+Flask
+SQLite
+Rasterio
+PyProj
+Requests
+```
+
+### Machine Learning
+
+```text
+LightGBM
+CatBoost
+Scikit-learn
+```
+
+### Explainable AI
+
+```text
+SHAP
+LIME
+```
+
+### Frontend
+
+```text
+HTML
+CSS
+JavaScript
+Chart.js
+```
+
+---
+
+# 📁 Project Structure
+
+```text
+soil_project_complete/
+│
+├── arduino/
+│   └── sensor_reader.ino
+│
 ├── backend/
-│   ├── app.py                 # Flask server + API endpoints
-│   ├── train_model.py         # LightGBM/CatBoost training
+│   ├── app.py
+│   ├── advice_engine.py
+│   │
 │   ├── data/
-│   │   ├── soil_data.csv      # Training dataset (geospatial)
-│   │   └── predictions.db     # SQLite database (auto-created)
+│   │   ├── soil_data.csv
+│   │   ├── soil_training.csv
+│   │   ├── soil_temperature.csv
+│   │   ├── soil_training_temperature.csv
+│   │   ├── train_temperature_models.py
+│   │   ├── ph.tif
+│   │   ├── nitrogen.tif
+│   │   └── cec.tif
+│   │
 │   └── models/
 │       ├── lgb_model.joblib
-│       └── cat_model.joblib
+│       ├── cat_model.joblib
+│       ├── feature_names.joblib
+│       ├── class_names.joblib
+│       ├── background_data.joblib
+│       ├── lgb_model_temperature.joblib
+│       ├── cat_model_temperature.joblib
+│       ├── feature_names_temperature.joblib
+│       ├── class_names_temperature.joblib
+│       ├── background_data_temperature.joblib
+│       └── temperature_model_metrics.joblib
+│
 ├── frontend/
-│   └── index.html             # Single-page React dashboard
-├── arduino/
-│   └── sensor_reader.ino      # Arduino sketch
-├── config.py                  # Configuration (serial port, baud rate, etc.)
-├── database_setup.py          # Database schema + helper functions
-├── requirements.txt           # Python dependencies
+│   ├── index.html
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── main.js
+│
+├── config.py
+├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## 🔌 **API Endpoints**
+# 🚀 Installation & Setup
 
-| Endpoint | Returns |
-|----------|---------|
-| `GET /` | Dashboard HTML |
-| `GET /api/latest` | Current reading + prediction + SHAP/LIME |
-| `GET /api/analytics` | Total predictions, agreement rate, avg confidence |
-| `GET /api/status` | Model status, database ready, serial connected |
-| `GET /api/history` | Last 24h predictions (100 max) |
-| `GET /api/export` | All data as JSON |
+## 1. Clone the Repository
 
----
-
-## 📊 **Dataset**
-
-**Source:** Geospatial soil fertility dataset with real-world agricultural observations
-
-**Features Used:**
-- pH (soil acidity/alkalinity)
-- Moisture (% soil water content)
-- Temperature (°C, from Arduino sensors)
-- Nitrogen (N, available nitrogen in soil)
-- CEC (Cation Exchange Capacity)
-- Latitude & Longitude (geospatial coordinates for field location)
-
-**Dataset Size:** 2000+ samples from diverse agricultural regions
-
-**Data Splits:**
-- Training: 80% (1600 samples)
-- Testing: 20% (400 samples)
-
-**Preprocessing:**
-- Feature scaling (StandardScaler)
-- Missing value handling
-- Outlier detection and removal
-
----
-
-## 📊 **Model Performance**
-
-| Model | Accuracy | Confidence | Algorithm |
-|-------|----------|-----------|-----------|
-| LightGBM | 97.5% | 100.0% | Gradient Boosting |
-| CatBoost | 97.2% | 99.5% | Categorical Boosting |
-
-**Input Features:** pH, Moisture, Temperature, Nitrogen, CEC, Latitude, Longitude
-
-**Output:** Soil Fertility Classification (Low / Medium / High)
-
----
-
-## 🎯 **Login Credentials** (Demo)
-
+```bash
+git clone https://github.com/Srilakshmi1110/explainable-iot-soil-fertility.git
+cd explainable-iot-soil-fertility
 ```
-admin / 123456
-sri / 123456
-user / password
+
+## 2. Create a Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+## 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## 4. Configure Arduino
+
+Update the serial port in `config.py`:
+
+```python
+SERIAL_PORT = "COM3"
+SERIAL_BAUD = 9600
+```
+
+Upload:
+
+```text
+arduino/sensor_reader.ino
+```
+
+to the Arduino.
+
+## 5. Start the Application
+
+```bash
+python backend/app.py
+```
+
+Open:
+
+```text
+http://127.0.0.1:5000
 ```
 
 ---
 
-## 🌾 **Conclusion**
+# 🎯 Model Input
 
-SoilAI delivers explainable soil fertility predictions at 97.5% accuracy by integrating Arduino IoT sensors with LightGBM and SHAP/LIME transparency, enabling transparent, data-driven farming decisions.
+The final prediction model uses seven features:
+
+```text
+[Latitude,
+ Longitude,
+ pH,
+ Moisture,
+ Temperature,
+ Nitrogen,
+ CEC]
+```
+
+Example:
+
+```text
+Latitude    = 13.068198
+Longitude   = 77.503880
+pH          = 6.5
+Moisture    = 65%
+Temperature = 25°C
+Nitrogen    = 174
+CEC         = 140
+```
+
+The system produces:
+
+```text
+Fertility Prediction
+        ↓
+Model Confidence
+        ↓
+Model Agreement
+        ↓
+SHAP + LIME Explanation
+        ↓
+Crop Recommendation
+```
 
 ---
 
-## 🚀 **Future Work**
+# 📊 Dashboard
 
-1. **Edge deployment on Raspberry Pi** — Enable offline predictions in low-connectivity farm areas
-2. **Predictive recommendation engine** — Forecast optimal irrigation timing based on weather + soil trends
-3. **SMS/WhatsApp alerts** — Notify farmers via text when soil fertility drops or crop conditions worsen
-4. **Soil anomaly detection** — Identify sensor failures or sudden soil degradation automatically
+The dashboard provides a unified view of soil analysis.
+
+### 🌡️ Sensor Monitoring
+
+Displays real-time:
+
+```text
+pH
+Moisture
+Temperature
+```
+
+### 🧪 Soil Properties
+
+Displays location-based:
+
+```text
+Nitrogen
+CEC
+```
+
+### 🤖 Fertility Prediction
+
+Shows:
+
+```text
+LightGBM Prediction
+CatBoost Prediction
+Confidence
+Model Agreement
+```
+
+### 🔍 Explainability
+
+Displays feature contributions using:
+
+```text
+SHAP
+LIME
+```
+
+### 🌾 Crop Recommendation
+
+Displays suitable crops based on soil conditions.
+
+### 📈 Analytics
+
+Displays:
+
+```text
+Total Predictions
+High Fertility
+Medium Fertility
+Low Fertility
+Moisture History
+Temperature History
+```
 
 ---
 
-## 📄 **License**
+# 🔮 Future Scope
 
-Educational Project | Sapthagiri College of Engineering, Bengaluru
+**• Integrate additional soil nutrients such as phosphorus, potassium, and organic carbon for more comprehensive soil analysis.**
 
----
+**• Expand geospatial soil datasets to cover more regions and provide more location-specific predictions.**
 
-## 👥 **Team**
-
-- Prabhudeva BN (1SG23CS078)
-- Shreya Praveen Ramadurg (1SG23CS101)
-- **Srilakshmi Seshadri (1SG23CS110)**
-- Sharath MR (1SG24CS410)
-
-**Guide:** Prof. Sheela Rani C M
+**• Develop a cloud/mobile platform for long-term soil tracking and personalized agricultural recommendations.**
 
 ---
 
-## 🔗 **Resources**
+# 👩‍💻 Project Summary
 
-- [LightGBM Docs](https://lightgbm.readthedocs.io/)
-- [SHAP GitHub](https://github.com/slundberg/shap)
-- [LIME GitHub](https://github.com/marcotcr/lime)
-- [Flask Documentation](https://flask.palletsprojects.com/)
+This project integrates **IoT, geospatial data, machine learning, and explainable AI** into a single soil analysis platform.
 
----
+The system moves beyond simply predicting soil fertility by providing:
 
-**Questions?** Open an issue on GitHub!
+```text
+Measure → Predict → Explain → Recommend
+```
 
-🌱 *Smart Farming Starts with Smart Data*
+> 🌱 **Smarter soil insights for smarter agricultural decisions.**
